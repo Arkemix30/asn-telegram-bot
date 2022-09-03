@@ -28,7 +28,8 @@ def get_current_earthquake_info():
         return None
     infile_data = read_file()
     
-    if not data[0]["datetime"] == infile_data["datetime"]:
+
+    if not data[0]["datetime"] == infile_data["datetime"] or not infile_data:
         logging.info("ℹ💾 New data detected, writing file")
         try:
             write_file(data[0])
