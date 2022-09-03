@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "unofficial-asn-telegram-bot"
+version = "0.1.0"
+description = ""
+authors = ["Enmanuel Silva <enmanuel.silva@spotcloud.io>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+python-telegram-bot = "20.0a4"
+python-dotenv = "^0.20.0"
+requests = "^2.28.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+black = {version = "^22.8.0", allow-prereleases = true}
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
