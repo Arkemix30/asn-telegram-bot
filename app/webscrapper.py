@@ -27,7 +27,7 @@ def get_current_earthquake_info():
         logging.info("🛑 No data from json body")
         return None
     infile_data = read_file()
-    
+
 
     if not data[0]["datetime"] == infile_data["datetime"] or not infile_data:
         logging.info("ℹ💾 New data detected, writing file")
