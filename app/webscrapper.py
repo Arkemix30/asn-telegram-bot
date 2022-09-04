@@ -1,42 +1,42 @@
-import json
-import requests
-import logging
-from .file_writer import write_file, read_file
+from app.core.loggin_config import get_logger
+from app.services.earthquake_info import get_earthquake_info
+from app.crud.earthquake import earthquake_crud
+from app.schemas.earthquake import EarthquakeCreateSchema
 
+logger = get_logger(__name__)
 
-
-headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Max-Age': '3600',
-    'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0'
-    }
-# url = "https://www.meteosolana.net/terremotos-recientes/mapa-de-terremotos-recientes-en-nicaragua/"
-url = "https://www.meteosolana.net/cache-headers/earthquakes-group/mapa-de-terremotos-recientes-en-nicaragua/50"
 
 def get_current_earthquake_info():
-    logging.info("ℹ Getting current earthquake info")
-    try:
-        req = requests.get(url, headers)
-    except Exception as err:
-        logging.error(f"🛑 Error when getting data from API, error: {err}")
-        return None
-    data = req.json()
+    data = get_earthquake_info()
     if not data:
-        logging.info("🛑 No data from json body")
+        logger.exception("🛑 No data from json body")
         return None
-    infile_data = read_file()
 
+    in_db_data = earthquake_crud.get_last_record()
 
-    if not data[0]["datetime"] == infile_data["datetime"] or not infile_data:
-        logging.info("ℹ💾 New data detected, writing file")
-        try:
-            write_file(data[0])
-        except Exception as err:
-            logging.info(f"🛑 Error when writing file, error: {err}")
-        return data[0]
+    if not in_db_data:
+        logger.exception("🛑 No data found from db")
+        data = earthquake_comparison(data)
+        if data:
+            return data
+
+    if not data["datetime"] == in_db_data["datetime"].strftime("%Y-%m-%d %H:%M:%S"):
+        data = earthquake_comparison(data)
+        return data
     else:
-        logging.info("🚨 No earthquakes detected")
+        logger.info("🚨 No earthquakes detected")
         return None
-    
+
+
+def earthquake_comparison(data):
+    logger.info("ℹ💾 New data detected, inserting into db...")
+    try:
+        new_earthquake = EarthquakeCreateSchema(**data)
+        db_result = earthquake_crud.insert(new_earthquake)
+    except Exception as err:
+        logger.exception(f"🛑 Error when inserting into DB, error: {err}")
+        return None
+
+    if not db_result:
+        logger.exception("🛑 Error when inserting into DB, no data returned")
+    return data
