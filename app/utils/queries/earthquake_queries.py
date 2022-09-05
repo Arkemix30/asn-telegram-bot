@@ -6,7 +6,7 @@ from app.utils.utils_models import row2dict
 
 
 def query_get_last_record(sessions: Session) -> Earthquake:
-    statement = select(Earthquake).order_by(Earthquake.id).limit(1)
+    statement = select(Earthquake).order_by(Earthquake.id.desc()).limit(1)
     result = sessions.exec(statement).first()
     return result
 
