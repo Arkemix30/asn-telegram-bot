@@ -18,7 +18,7 @@ def get_earthquake_info():
     try:
         req = requests.get(url, headers)
     except Exception as err:
-        logger.exception(f"🛑 Error when getting data from API, error: {err}")
+        logger.error(f"🛑 Error when getting data from API, error: {err}")
         return None
     data = req.json()
     if not data:

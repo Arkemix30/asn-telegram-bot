@@ -21,18 +21,20 @@ class CRUDEarthquake:
             db_obj = Earthquake(**obj_in.dict())
             obj_out = query_insert_new_earthquake(self.db, db_obj)
         except Exception as err:
-            logger.exception(f"Error when inserting into database, error: {err}")
+            logger.error(f"Error when inserting into database, error: {err}")
             return None
         return obj_out
 
     def get_last_record(self):
         try:
             db_record: Earthquake = query_get_last_record(self.db)
-            db_record = db_record.dict()
+            if db_record:
+                db_record = db_record.dict()
         except Exception as err:
-            logger.exception(f"Error when fetching last record from DB, error: {err}")
-            return None
-        return db_record
+            msg_error = "Error when getting last record"
+            logger.error(f"{msg_error}, error: {err}")
+            return {"error": msg_error}
+        return {'data': db_record}
 
 
 earthquake_crud = CRUDEarthquake()
